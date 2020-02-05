@@ -16,10 +16,11 @@ import androidx.annotation.Nullable;
 
 import java.io.IOException;
 
+
 public class NFCReadFragment extends DialogFragment {
 
     public static final String TAG = NFCReadFragment.class.getSimpleName();
-
+    //public class FileWriter{};
     public static NFCReadFragment newInstance() {
 
         return new NFCReadFragment();
@@ -55,24 +56,30 @@ public class NFCReadFragment extends DialogFragment {
         mListener.onDialogDismissed();
     }
 
-    public void onNfcDetected(Ndef ndef){
+    public String onNfcDetected(Ndef ndef){
 
-        readFromNFC(ndef);
+        return readFromNFC(ndef);
     }
 
-    private void readFromNFC(Ndef ndef) {
+    private String readFromNFC(Ndef ndef) {
 
+        String message = "Message not read";
         try {
             ndef.connect();
             NdefMessage ndefMessage = ndef.getNdefMessage();
-            String message = new String(ndefMessage.getRecords()[0].getPayload());
-            Log.d(TAG, "readFromNFC: "+message);
-            mTvMessage.setText(message);
+            if (ndefMessage != null) {
+                message = new String(ndefMessage.getRecords()[0].getPayload());
+                Log.d(TAG, "readFromNFC: "+message);
+                mTvMessage.setText(message);
+            } else {
+                Log.d(TAG, "ERROR: retake reading");
+            }
             ndef.close();
 
         } catch (IOException | FormatException e) {
             e.printStackTrace();
 
         }
+        return message;
     }
 }

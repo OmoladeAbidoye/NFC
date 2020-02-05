@@ -14,6 +14,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.opencsv.CSVWriter;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity implements Listener{
 
     public static final String TAG = MainActivity.class.getSimpleName();
@@ -136,7 +142,44 @@ public class MainActivity extends AppCompatActivity implements Listener{
                 } else {
 
                     mNfcReadFragment = (NFCReadFragment)getFragmentManager().findFragmentByTag(NFCReadFragment.TAG);
-                    mNfcReadFragment.onNfcDetected(ndef);
+                    String message = mNfcReadFragment.onNfcDetected(ndef);
+                    // save messagetowrite onto local storage
+                    //String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+
+                    String fileName = "AnalysisData.csv";
+                    String filePath = getFilesDir() + File.separator + fileName;
+                    File f = new File(filePath);
+                    CSVWriter writer = null;
+
+                    // File exist
+                    if(f.exists()&&!f.isDirectory())
+                    {
+                        FileWriter mFileWriter = null;
+                        try {
+                            mFileWriter = new FileWriter(filePath, true);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        writer = new CSVWriter(mFileWriter);
+                    }
+                    else
+                    {
+                        try {
+                            writer = new CSVWriter(new FileWriter(filePath));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                    String[] dummy = new String[1];
+                    dummy[0] = message;
+                    writer.writeNext(dummy);
+                    try {
+                        writer.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                 }
             }
         }
