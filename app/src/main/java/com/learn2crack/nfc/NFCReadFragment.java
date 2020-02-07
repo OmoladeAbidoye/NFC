@@ -20,6 +20,8 @@ import java.io.IOException;
 public class NFCReadFragment extends DialogFragment {
 
     public static final String TAG = NFCReadFragment.class.getSimpleName();
+    public static NdefMessage lastNdef;
+
     //public class FileWriter{};
     public static NFCReadFragment newInstance() {
 
@@ -67,13 +69,18 @@ public class NFCReadFragment extends DialogFragment {
         try {
             ndef.connect();
             NdefMessage ndefMessage = ndef.getNdefMessage();
-            if (ndefMessage != null) {
-                message = new String(ndefMessage.getRecords()[0].getPayload());
-                Log.d(TAG, "readFromNFC: "+message);
-                mTvMessage.setText(message);
-            } else {
-                Log.d(TAG, "ERROR: retake reading");
+            while (true) {
+                if (ndefMessage != null && ndefMessage != lastNdef) {
+                    message = new String(ndefMessage.getRecords()[0].getPayload());
+                    Log.d(TAG, "readFromNFC: "+message);
+                    mTvMessage.setText(message);
+                    lastNdef = ndefMessage;
+                    break;
+                } else {
+                    Log.d(TAG, "ERROR: retake reading or equal value");
+                }
             }
+
             ndef.close();
 
         } catch (IOException | FormatException e) {

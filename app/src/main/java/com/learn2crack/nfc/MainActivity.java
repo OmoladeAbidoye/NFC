@@ -7,6 +7,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -140,43 +141,52 @@ public class MainActivity extends AppCompatActivity implements Listener{
                     mNfcWriteFragment.onNfcDetected(ndef,messageToWrite);
 
                 } else {
-                    for (int j = 0; j < 100 ; j++) {
 
-                        mNfcReadFragment = (NFCReadFragment) getFragmentManager().findFragmentByTag(NFCReadFragment.TAG);
-                        String message = mNfcReadFragment.onNfcDetected(ndef);
-                        // save messagetowrite onto local storage
-                        //String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 
-                        String fileName = "AnalysisData.csv";
-                        String filePath = getFilesDir() + File.separator + fileName;
-                        File f = new File(filePath);
-                        CSVWriter writer = null;
+                    for (int j = 0; j < 50 ; j++) {
+                        new Handler().postDelayed(new Runnable() {
 
-                        // File exist
-                        if (f.exists() && !f.isDirectory()) {
-                            FileWriter mFileWriter = null;
-                            try {
-                                mFileWriter = new FileWriter(filePath, true);
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            @Override
+                            public void run() {
+                                mNfcReadFragment = (NFCReadFragment) getFragmentManager().findFragmentByTag(NFCReadFragment.TAG);
+                                String message = mNfcReadFragment.onNfcDetected(ndef);
+                                // save messagetowrite onto local storage
+                                //String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+
+                                String fileName = "AnalysisData.csv";
+                                String filePath = getFilesDir() + File.separator + fileName;
+                                File f = new File(filePath);
+                                CSVWriter writer = null;
+
+                                // File exist
+                                if (f.exists() && !f.isDirectory()) {
+                                    FileWriter mFileWriter = null;
+                                    try {
+                                        mFileWriter = new FileWriter(filePath, true);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    writer = new CSVWriter(mFileWriter);
+                                } else {
+                                    try {
+                                        writer = new CSVWriter(new FileWriter(filePath));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                }
+                                String[] dummy = new String[1];
+                                dummy[0] = message;
+                                writer.writeNext(dummy);
+                                try {
+                                    writer.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                            writer = new CSVWriter(mFileWriter);
-                        } else {
-                            try {
-                                writer = new CSVWriter(new FileWriter(filePath));
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                        }, 500 );//time in milisecond
 
-                        }
-                        String[] dummy = new String[1];
-                        dummy[0] = message;
-                        writer.writeNext(dummy);
-                        try {
-                            writer.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+
                     }
                 }
             }
