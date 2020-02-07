@@ -140,46 +140,44 @@ public class MainActivity extends AppCompatActivity implements Listener{
                     mNfcWriteFragment.onNfcDetected(ndef,messageToWrite);
 
                 } else {
+                    for (int j = 0; j < 100 ; j++) {
 
-                    mNfcReadFragment = (NFCReadFragment)getFragmentManager().findFragmentByTag(NFCReadFragment.TAG);
-                    String message = mNfcReadFragment.onNfcDetected(ndef);
-                    // save messagetowrite onto local storage
-                    //String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+                        mNfcReadFragment = (NFCReadFragment) getFragmentManager().findFragmentByTag(NFCReadFragment.TAG);
+                        String message = mNfcReadFragment.onNfcDetected(ndef);
+                        // save messagetowrite onto local storage
+                        //String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
 
-                    String fileName = "AnalysisData.csv";
-                    String filePath = getFilesDir() + File.separator + fileName;
-                    File f = new File(filePath);
-                    CSVWriter writer = null;
+                        String fileName = "AnalysisData.csv";
+                        String filePath = getFilesDir() + File.separator + fileName;
+                        File f = new File(filePath);
+                        CSVWriter writer = null;
 
-                    // File exist
-                    if(f.exists()&&!f.isDirectory())
-                    {
-                        FileWriter mFileWriter = null;
+                        // File exist
+                        if (f.exists() && !f.isDirectory()) {
+                            FileWriter mFileWriter = null;
+                            try {
+                                mFileWriter = new FileWriter(filePath, true);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            writer = new CSVWriter(mFileWriter);
+                        } else {
+                            try {
+                                writer = new CSVWriter(new FileWriter(filePath));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                        String[] dummy = new String[1];
+                        dummy[0] = message;
+                        writer.writeNext(dummy);
                         try {
-                            mFileWriter = new FileWriter(filePath, true);
+                            writer.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        writer = new CSVWriter(mFileWriter);
                     }
-                    else
-                    {
-                        try {
-                            writer = new CSVWriter(new FileWriter(filePath));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                    String[] dummy = new String[1];
-                    dummy[0] = message;
-                    writer.writeNext(dummy);
-                    try {
-                        writer.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
                 }
             }
         }
